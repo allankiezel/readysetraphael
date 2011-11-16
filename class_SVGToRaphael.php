@@ -1,9 +1,20 @@
 <?php
 
-/*
+/**
  * Converts SVG file into Raphael.js generated .js file
  *
+ * PHP version 5
+ *
+ * LICENSE: Ready.Set.Raphael by http://www.thinkbi.gr is 
+ * licensed under a Creative Commons Attribution 3.0 Unported License.
+ *
+ * @author     Allan Kiezel <allan@thinkbi.gr>
+ * @copyright  2011 Thinkbigr (http://www.thinkbi.gr)
+ * @license    http://creativecommons.org/licenses/by/3.0/  Creative Commons License Attribution 3.0 Unported
+ * @version    Beta 2
+ * @link       https://github.com/thinkbigr/Ready.Set.Raphael
  */
+
 class SVGToRaphael {
 	
 	/**
