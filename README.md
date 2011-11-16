@@ -5,7 +5,7 @@
 <p>require("class_SVGToRaphael.php");</p>
 
 <p>$xml = file_get_contents("map.svg");<br />
-$string = <<<XML<br />
+$string = &lt;&lt;<XML<br />
 {$xml}<br />
 XML;</p>
 
