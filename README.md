@@ -1,7 +1,6 @@
 <p><b>SAMPLE:</b></p>
 
-<code>
- <p> &lt;?php</p>
+<p> &lt;?php</p>
 
 <p>require("class_SVGToRaphael.php");</p>
 
@@ -15,4 +14,3 @@ XML;</p>
 <p>$svg->generateJs();</p>
  
 <p>?&gt;</p>
-<code>
