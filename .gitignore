@@ -5,3 +5,5 @@ zeroclipboard/
 index.php
 submit.php
 class_SVGToRaphael_broken.php
+.gitignore
+.DS_Store
