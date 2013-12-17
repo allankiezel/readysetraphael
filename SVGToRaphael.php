@@ -902,8 +902,8 @@ class SVGToRaphael
 
             case 'radial':
 
-                $g = 'r(' . (str_replace('%', '', $gradient['fx']) / 100) . ', ' .
-                         (str_replace('%', '', $gradient['fy']) / 100) . ')';
+                $g = 'r(' . (str_replace('%', '', $gradient['fx']) / $gradient['cx']) . ', ' .
+                         (str_replace('%', '', $gradient['fy']) / $gradient['cy']) . ')';
 
                 foreach ($gradient['stops'] as $stop) {
 
