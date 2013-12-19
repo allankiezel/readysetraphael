@@ -22,7 +22,7 @@ $xml =  file_get_contents('sample.svg');
 try {
 
     $svg = new SVGToRaphael( $xml );
-    sleep(2.5);
+    sleep(2);
     $svg->generateJs();
 
 } catch (Exception $e) {
