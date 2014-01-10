@@ -39,6 +39,11 @@ class SVGToRaphael
     public $js = '';
 
     /**
+     * String holding Javascript set output
+     */
+    public $setJs = '';
+
+    /**
      * Container to house svg output
      */
     public $container = 'rsr';
@@ -119,6 +124,7 @@ class SVGToRaphael
         $this->setArray = str_replace('"', '', json_encode($this->setArray));
 
         $this->addToJs(sprintf("\n\nvar rsrGroups = %s;", $this->setArray));
+
     }
 
     public function allowedElement()
@@ -170,34 +176,44 @@ class SVGToRaphael
     /**
      * Appends the string to the current js script string
      *
-     * @param string  $string  String to append
-     * @param boolean $newLine Boolean to add new line character to string
+     * @param string  $string     String to append
+     * @param boolean $newLine    Boolean to add new line character to string
+     * @param boolean $addToSetJs Should the output be concat'd to the setJs string
      */
-    public function addToJs($string = '', $newLine = true)
+    public function addToJs($string = '', $newLine = true, $addToSetJs = false)
     {
         $js = '';
+        $setJs = '';
 
-        // If adding to a "set" remove var initializer
-        if ($this->inSet) {
-            // echo "STRING: ".$string." END STING";
-            list ($waste, $keep) = explode('=', $string);
-            $js .= "\t" . $keep;
-        } else {
-            // echo "STRING: ".$string." END STING";
-            $js .= $string;
-        }
-
-        // If adding to a "set" use comma instead of semi-colon
+        /*
+         * If adding to a "set" add the var name to the set and
+         * add the element to the js ouput
+        */
         if ($this->inSet) {
 
-            $js = substr($js, 0, - 1) . ',';
+            $pattern = '/var\s*([a-zA-Z_-]+)/';
+
+            preg_match_all($pattern, $string, $parts, PREG_SET_ORDER);
+
+            $varName = $parts[0][1];
+
+            $setJs .= "\n\t" . $varName . ",";
+
         }
+
+        $js .= $string;
 
         if ($newLine) {
             $js .= "\n";
         }
 
-        $this->js .= $js;
+        if ($addToSetJs === true) {
+            $this->setJs .= $js;
+        } else {
+            $this->js .= $js;
+        }
+
+        $this->setJs .= $setJs;
     }
 
     /**
@@ -279,7 +295,7 @@ class SVGToRaphael
 
         if ($this->setHasElements($set)) {
 
-            $this->addToJs($id . '.push(');
+            $this->addToJs(sprintf('%s.push(', $id), false, true);
 
             foreach ($set as $element) {
 
@@ -300,12 +316,12 @@ class SVGToRaphael
                 }
             }
 
-            if (substr($this->js, 0 - 2) == ",\n") {
-                // Remove trailing ',' from $this->js
-                $this->js = substr($this->js, 0, - 2);
+            if (substr($this->setJs, -1) === ',') {
+                // Remove trailing ',' from $this->setJs
+                $this->setJs = substr($this->setJs, 0, -1);
             }
 
-            $this->addToJs(');');
+            $this->addToJs("\n);", true, true);
         }
 
         $attrs = $set->attributes();
@@ -955,6 +971,7 @@ class SVGToRaphael
     public function generateJs()
     {
         echo $this->js;
+        echo $this->setJs;
     }
 
     public function printSVG()
@@ -1012,7 +1029,7 @@ class SVGToRaphael
         return '#' . $color;
     }
 
-    private function __call($method, $arguments)
+    public function __call($method, $arguments)
     {
         if (strstr($method, 'draw') !== FALSE) {
             // throw new Exception('Unsupported element:
