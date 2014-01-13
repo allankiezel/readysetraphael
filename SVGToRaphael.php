@@ -191,7 +191,7 @@ class SVGToRaphael
         */
         if ($this->inSet) {
 
-            $pattern = '/var\s*([a-zA-Z_-]+)/';
+            $pattern = '/var\s+(.+)\s*=/';
 
             preg_match_all($pattern, $string, $parts, PREG_SET_ORDER);
 
@@ -359,7 +359,7 @@ class SVGToRaphael
         }
 
         // HACK
-        $a = substr($a, 0, - 1);
+        $a = substr($a, 0, -1);
 
         if ($transform) {
             $this->addToJs($id . '.attr({' . $a . '});' . $id . '.' . $t . ';');
@@ -517,7 +517,7 @@ class SVGToRaphael
                 $text .= $this->getCurrentElement()->tspan[$i] . '\n';
             }
 
-            $text = substr($text, 0, - 2);
+            $text = substr($text, 0, -2);
         }
 
         if ($text == '') {
@@ -673,7 +673,7 @@ class SVGToRaphael
         }
 
         if (strlen($t) > 0) {
-            $t = substr($t, 0, - 1);
+            $t = substr($t, 0, -1);
         }
 
         if (strstr($a, 'stroke-width') === FALSE) {
@@ -695,7 +695,7 @@ class SVGToRaphael
             $a .= "'fill': '#000000',";
         }
 
-        $a = substr($a, 0, - 1);
+        $a = substr($a, 0, -1);
 
         if ($this->inSet) {
 
@@ -799,7 +799,7 @@ class SVGToRaphael
             }
 
             // Add gradient type
-            $gradientTemp['type'] = substr($element->getName(), 0, - 8);
+            $gradientTemp['type'] = substr($element->getName(), 0, -8);
 
             if (array_key_exists('gradientTransform', $gradientTemp)) {
 
@@ -912,7 +912,7 @@ class SVGToRaphael
                     $opacity = $op[1];
                 }
 
-                $g = substr($g, 0, - 1) . '__' . $opacity;
+                $g = substr($g, 0, -1) . '__' . $opacity;
 
                 break;
 
@@ -942,14 +942,14 @@ class SVGToRaphael
                     } else {
 
                         $g .= $style[1] . ':' . $offset . '-';
-                        ;
+
                     }
 
                     $op = explode(':', $s[1]);
                     $opacity = $op[1];
                 }
 
-                $g = substr($g, 0, - 1) . '__' . $opacity;
+                $g = substr($g, 0, -1) . '__' . $opacity;
 
                 break;
         }
