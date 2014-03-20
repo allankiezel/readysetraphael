@@ -354,6 +354,12 @@ class SVGToRaphael
                         $t = 'transform("t' . $args . '")';
 
                         break;
+
+                    case 'scale':
+
+                        $t = 'transform("s' . $args . '")';
+
+                        break;
                 }
             }
         }
