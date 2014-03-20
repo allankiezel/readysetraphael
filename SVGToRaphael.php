@@ -685,14 +685,14 @@ class SVGToRaphael
         if (strstr($a, 'stroke-width') === FALSE) {
 
             // Raphael adds a default stroke to paths
-            // If there is none add a stroke-width:0 hack
-            $a .= "'stroke-width': '0',";
+            // If there is none add a stroke-width:1 as documented in http://www.w3.org/TR/SVG/painting.html#StrokeWidthProperty
+            $a .= "'stroke-width': '1',";
         }
 
         if (strstr($a, 'stroke-opacity') === FALSE) {
 
             // Raphael adds a default stroke to paths
-            // If there is none add a stroke-width:0 hack
+            // If there is none add a stroke-width:1  as documented in http://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty 
             $a .= "'stroke-opacity': '1',";
         }
 
