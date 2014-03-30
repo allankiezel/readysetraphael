@@ -1,0 +1,28 @@
+{
+    "name": "allankiezel/ready-set-raphael git",
+    "description": "Ready Set Raphael SVG Parser",
+    "homepage": "http://www.readysetraphael.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Allan Kiezel",
+            "email": "allan.kiezel@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.0.*",
+        "mockery/mockery": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "AllanKiezel\\ReadySetRaphael\\": "src/"
+        },
+        "classmap": [
+            "tests/"
+        ]
+    }
+}
