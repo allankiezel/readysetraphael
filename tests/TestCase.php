@@ -13,9 +13,13 @@ namespace tests;
  */
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
+    protected $sampleSVGContents;
+
     protected function setUp()
     {
         parent::setUp();
+
+        $this->sampleSVGContents = file_get_contents(__DIR__  . '/_data/sample.svg');
     }
 
     protected function tearDown()

@@ -25,33 +25,14 @@ class Parser implements ParserInterface
     public $container = 'rsr';
 
     /**
-     * @var string $svg SimpleXML Object representation of SVG file.
+     * @var string $currentSetName Current set name.
      */
-    private $svg = '';
+    public $currentSetName = '';
 
     /**
-     * @var array $ignored Array of elements to ignore during iteration.
+     * @var array $gradients Gradients.
      */
-    private $supportedElements = array(
-        'g',
-        'path',
-        'polygon',
-        'rect',
-        'circle',
-        'ellipse',
-        'switch',
-        'text'
-    );
-
-    /**
-     * @var string $js String holding Javascript output.
-     */
-    private $js = '';
-
-    /**
-     * @var string $setJs String holding Javascript set output.
-     */
-    private $setJs = '';
+    public $gradients = array();
 
     /**
      * @var string $ln Line ending.
@@ -59,9 +40,14 @@ class Parser implements ParserInterface
     public $ln = ';';
 
     /**
-     * @var string $svgName Javascript variable name of Raphael Object.
+     * @var mixed $parentSet Previous set name.
      */
-    private $svgName = 'rsr';
+    public $parentSetName = null;
+
+    /**
+     * @var array $set "set" array.
+     */
+    public $set = array();
 
     /**
      * @var \SimpleXMLElement $currentElement Current pointer position element during iteration.
@@ -80,29 +66,43 @@ class Parser implements ParserInterface
     private $inSet = false;
 
     /**
+     * @var string $js String holding Javascript output.
+     */
+    private $js = '';
+
+    /**
      * @var array $setArray Holds multi-dimensional array of "set" elements.
      */
     private $setArray = array();
 
     /**
-     * @var array $set "set" array.
+     * @var string $setJs String holding Javascript set output.
      */
-    public $set = array();
+    private $setJs = '';
 
     /**
-     * @var string $currentSetName Current set name.
+     * @var array $ignored Array of elements to ignore during iteration.
      */
-    public $currentSetName = '';
+    private $supportedElements = array(
+        'g',
+        'path',
+        'polygon',
+        'rect',
+        'circle',
+        'ellipse',
+        'switch',
+        'text'
+    );
 
     /**
-     * @var mixed $parentSet Previous set name.
+     * @var string $svg SimpleXML Object representation of SVG file.
      */
-    public $parentSetName = null;
+    private $svg = '';
 
     /**
-     * @var array $gradients Gradients.
+     * @var string $svgName Javascript variable name of Raphael Object.
      */
-    public $gradients = array();
+    private $svgName = 'rsr';
 
     /**
      * Constructor
@@ -123,7 +123,6 @@ class Parser implements ParserInterface
         $this->initRaphael();
 
         if (isset($this->svg->defs)) {
-
             $this->generateGradients();
         }
 
@@ -136,84 +135,20 @@ class Parser implements ParserInterface
         $this->addToJs(sprintf("\n\nvar rsrGroups = %s;", $this->setArray));
     }
 
-    /**
-     * Iterates SVG and generates a multi-dimensional array of groups
-     *
-     * @param \SimpleXMLElement $obj SVG to parse.
-     */
-    public function init($obj)
+    public function __call($method, $arguments)
     {
-
-        // Loop through svg and create set array
-        foreach ($obj->children() as $element) {
-
-            // Update to element that is being parsed
-            $this->currentElement = $element;
-
-            // If element has children (ie: group) build a "set" && not "TEXT"
-            if (count($element->children()) > 0 && $element->getName() != 'text') {
-
-                if ($this->allowedElement()) {
-
-                    $this->createSet();
-
-                    $this->init($element);
-                }
-            }
+        if (strstr($method, 'draw') !== FALSE) {
+            // throw new Exception('Unsupported element:
+            // '.htmlentities('<'.strtolower(str_replace("draw", "", $method)).'
+            // />'));
         }
-    }
-
-    public function allowedElement()
-    {
-
-        // Check if element is in ignored list
-        return in_array($this->getCurrentElement()->getName(), $this->supportedElements);
-    }
-
-    /**
-     * Creates the intial Raphael object
-     */
-    public function initRaphael()
-    {
-        $attrs = $this->svg->attributes();
-
-        if (isset($attrs['viewBox'])) {
-
-            list ($x, $y, $w, $h) = explode(' ', $attrs['viewBox']);
-        } else {
-
-            $x = 0;
-            $y = 0;
-
-            $w = $attrs['width'];
-
-            $h = $attrs['height'];
-        }
-
-        if (strstr($w, 'pt') !== FALSE) {
-
-            $w = ceil(str_replace('pt', '', $w) / 0.75);
-            $h = ceil(str_replace('pt', '', $h) / 0.75);
-        } elseif (strstr($w, 'px') !== FALSE) {
-
-            $w = str_replace('px', '', $attrs['w']);
-            $h = str_replace('px', '', $attrs['h']);
-        } else {
-
-            $w = "'$w'";
-            $h = "'$h'";
-        }
-
-        $this->addToJs(
-            sprintf("var %s = Raphael('%s', %s, %s);\n", $this->svgName,
-                $this->container, $w, $h));
     }
 
     /**
      * Appends the string to the current js script string
      *
-     * @param string  $string     String to append
-     * @param boolean $newLine    Boolean to add new line character to string
+     * @param string $string String to append
+     * @param boolean $newLine Boolean to add new line character to string
      * @param boolean $addToSetJs Should the output be concat'd to the setJs string
      */
     public function addToJs($string = '', $newLine = true, $addToSetJs = false)
@@ -252,144 +187,60 @@ class Parser implements ParserInterface
         $this->setJs .= $setJs;
     }
 
-    /**
-     * Add current group to set array
-     */
-    private function createSet()
+    public function allowedElement()
     {
-        $id = $this->generateVar('group');
-
-        // Add to javascript object as string
-        // This will assist in applying events to groups
-        $this->setArray[] = (string) $id;
-
-        $this->getCurrentElement()->addAttribute('name', $id);
-
-        $this->set[] = $this->getCurrentElement();
-
-        $this->generateParent($id);
+        // Check if element is in ignored list
+        return in_array($this->getCurrentElement()->getName(), $this->supportedElements);
     }
 
     /**
-     * Loops through the svg and set array and draws each element
+     * Creates an SVG circle
      */
-    private function draw()
+    public function drawCircle()
     {
 
-        // Draw all free standing elements not in a set
-        foreach ($this->svg as $element) {
+        $attrs = $this->getCurrentElement()->attributes();
 
-            // Update to element that is being parsed
-            $this->currentElement = $element;
+        $x = round($attrs['cx']);
+        $y = round($attrs['cy']);
+        $r = round($attrs['r']);
 
-            if ($this->allowedElement()) {
-
-                // Don't draw groups
-                if (count($element->children()) == 0) {
-
-                    $this->drawElement();
-                }
-            }
-        }
-
-        // Loop through sets array and draw each set
-        foreach ($this->set as $set) {
-            $this->drawSet($set);
-        }
+        $varName = $this->generateVar('circle');
+        $this->addToJs(
+            'var ' . $varName . ' = ' . $this->svgName .
+            ".circle($x, $y, $r)" .
+            $this->generateAttributes(
+                array(
+                    'cx',
+                    'cy',
+                    'r'
+                ), $varName) . ".data('id', '$varName')" . ';');
     }
 
-    private function drawSet($set)
+    /**
+     * Creates an SVG ellipse
+     */
+    public function drawEllipse()
     {
-        $id = $this->getAttribute($set, 'name');
 
-        $this->addToJs('var ' . $id . ' = ' . $this->svgName . '.set();');
+        $attrs = $this->getCurrentElement()->attributes();
 
-        if ($this->setHasElements($set)) {
+        $cx = $attrs['cx'];
+        $cy = $attrs['cy'];
+        $rx = $attrs['rx'];
+        $ry = $attrs['ry'];
 
-            $this->addToJs(sprintf('%s.push(', $id), false, true);
-
-            foreach ($set as $element) {
-
-                // Update to element that is being parsed
-                $this->currentElement = $element;
-
-                if ($this->allowedElement()) {
-
-                    // Don't draw groups
-                    if (count($element->children()) == 0 ||
-                        $element->getName() == 'text') {
-
-                        // Start drawing!
-                        $this->inSet = true;
-                        $this->drawElement();
-                        $this->inSet = false;
-                    }
-                }
-            }
-
-            if (substr($this->setJs, -1) === ',') {
-                // Remove trailing ',' from $this->setJs
-                $this->setJs = substr($this->setJs, 0, -1);
-            }
-
-            $this->addToJs("\n);", true, true);
-        }
-
-        $attrs = $set->attributes();
-
-        $a = "";
-        $transform = false;
-        foreach ($attrs as $key => $value) {
-
-            if ($key != 'transform') {
-                $a .= "'$key': '$value',";
-            } else {
-
-                $transform = true;
-
-                preg_match('/^(.+)\((.+)\)/', $value, $m);
-
-                $type = $m[1];
-                $args = $m[2];
-
-                switch ($type) {
-
-                    case 'matrix':
-
-                        $t = 'transform("m' . $args . '")';
-
-                        break;
-
-                    case 'translate':
-
-                        $t = 'transform("t' . $args . '")';
-
-                        break;
-
-                    case 'scale':
-
-                        $t = 'transform("s' . $args . '")';
-
-                        break;
-                }
-            }
-        }
-
-        // HACK
-        $a = substr($a, 0, -1);
-
-        if ($transform) {
-            $this->addToJs($id . '.attr({' . $a . '});' . $id . '.' . $t . ';');
-        } else {
-            $this->addToJs($id . '.attr({' . $a . '});');
-        }
-    }
-
-    private function drawElement()
-    {
-        $method = 'draw' . ucfirst($this->getCurrentElement()->getName());
-
-        $this->$method();
+        $varName = $this->generateVar('ellipse');
+        $this->addToJs(
+            'var ' . $varName . ' = ' . $this->svgName .
+            ".ellipse($cx, $cy, $rx, $ry)" .
+            $this->generateAttributes(
+                array(
+                    'cx',
+                    'cy',
+                    'rx',
+                    'ry'
+                ), $varName) . ".data('id', '$varName')" . ';');
     }
 
     /**
@@ -398,7 +249,8 @@ class Parser implements ParserInterface
      * *Note - Raphael does not have groups; it has "set"s
      */
     public function drawG()
-    {}
+    {
+    }
 
     /**
      * Creates an SVG path
@@ -466,56 +318,6 @@ class Parser implements ParserInterface
     }
 
     /**
-     * Creates an SVG ellipse
-     */
-    public function drawEllipse()
-    {
-
-        $attrs = $this->getCurrentElement()->attributes();
-
-        $cx = $attrs['cx'];
-        $cy = $attrs['cy'];
-        $rx = $attrs['rx'];
-        $ry = $attrs['ry'];
-
-        $varName = $this->generateVar('ellipse');
-        $this->addToJs(
-            'var ' . $varName . ' = ' . $this->svgName .
-            ".ellipse($cx, $cy, $rx, $ry)" .
-            $this->generateAttributes(
-                array(
-                    'cx',
-                    'cy',
-                    'rx',
-                    'ry'
-                ), $varName) . ".data('id', '$varName')" . ';');
-    }
-
-    /**
-     * Creates an SVG circle
-     */
-    public function drawCircle()
-    {
-
-        $attrs = $this->getCurrentElement()->attributes();
-
-        $x = round($attrs['cx']);
-        $y = round($attrs['cy']);
-        $r = round($attrs['r']);
-
-        $varName = $this->generateVar('circle');
-        $this->addToJs(
-            'var ' . $varName . ' = ' . $this->svgName .
-            ".circle($x, $y, $r)" .
-            $this->generateAttributes(
-                array(
-                    'cx',
-                    'cy',
-                    'r'
-                ), $varName) . ".data('id', '$varName')" . ';');
-    }
-
-    /**
      * Draw text on the SVG
      */
     public function drawText()
@@ -525,12 +327,12 @@ class Parser implements ParserInterface
 
         $x = $attrs['x'] != '' ? $attrs['x'] : 0;
         $y = $attrs['y'] != '' ? $attrs['y'] : 0;
-        $text = (string) $this->getCurrentElement();
+        $text = (string)$this->getCurrentElement();
 
         if (isset($this->getCurrentElement()->tspan) && $text == "") {
 
             for ($i = 0, $len = count($this->getCurrentElement()->tspan) - 1; $i <=
-            $len; $i ++) {
+            $len; $i++) {
                 $text .= $this->getCurrentElement()->tspan[$i] . '\n';
             }
 
@@ -553,29 +355,264 @@ class Parser implements ParserInterface
                 ), $varName) . ".data('id', '$varName')" . ';');
     }
 
-    private function getCurrentElement()
+    /**
+     * Outputs the generated javascript for raphael and its groups
+     */
+    public function generateJS()
     {
-        return $this->currentElement;
+        echo $this->js;
+        echo $this->setJs;
     }
 
     /**
-     * Returns attribute from current element
-     *
-     * @param  $attr Requested attribute
-     * @return string
+     * Returns the generated javascript for RaphaelJS and its groups
      */
-    private function getAttribute($obj, $attr)
+    public function getJS()
     {
-        $attrs = $obj->attributes();
+        return $this->js . $this->setJs;
+    }
 
-        return $attrs[$attr];
+    /**
+     * Iterates SVG and generates a multi-dimensional array of groups
+     *
+     * @param \SimpleXMLElement $obj SVG to parse.
+     */
+    public function init($obj)
+    {
+        // Loop through svg and create set array
+        foreach ($obj->children() as $element) {
+
+            // Update to element that is being parsed
+            $this->currentElement = $element;
+
+            // If element has children (ie: group) build a "set" && not "TEXT"
+            if (count($element->children()) > 0 && $element->getName() != 'text') {
+
+                if ($this->allowedElement()) {
+
+                    $this->createSet();
+
+                    $this->init($element);
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates the intial Raphael object
+     */
+    public function initRaphael()
+    {
+        $attrs = $this->svg->attributes();
+
+        if (isset($attrs['viewBox'])) {
+
+            list ($x, $y, $w, $h) = explode(' ', $attrs['viewBox']);
+        } else {
+
+            $x = 0;
+            $y = 0;
+
+            $w = $attrs['width'];
+
+            $h = $attrs['height'];
+        }
+
+        if (strstr($w, 'pt') !== FALSE) {
+            $w = ceil(str_replace('pt', '', $w) / 0.75);
+            $h = ceil(str_replace('pt', '', $h) / 0.75);
+        } elseif (strstr($w, 'px') !== FALSE) {
+            $w = str_replace('px', '', $attrs['w']);
+            $h = str_replace('px', '', $attrs['h']);
+        } else {
+            $w = "'$w'";
+            $h = "'$h'";
+        }
+
+        $this->addToJs(
+            sprintf("var %s = Raphael('%s', %s, %s);\n", $this->svgName,
+                $this->container, $w, $h));
+    }
+
+    public function printSVG()
+    {
+        print_r($this->svg);
+    }
+
+    /**
+     * Returns the angle between 2 sets of x & y coordinates
+     * Useful for generating angle for fill gradients
+     */
+    private function angle($x1, $y1, $x2, $y2)
+    {
+        $y = $y2 - $y1;
+        $x = $x2 - $x1;
+
+        if ($x == 0)
+            $x = 1 / 10000;
+
+        $deg = rad2deg(atan(abs($y / $x)));
+
+        // Looks like RaphaelJS uses the reverse so lets flip it!
+        // Normally we would use ($y >= 0)
+        if ($y <= 0) {
+
+            $deg = $x < 0 ? 180 - $deg : $deg;
+        } else {
+
+            $deg = $x < 0 ? 180 + $deg : 360 - $deg;
+        }
+
+        return $deg;
+    }
+
+    /**
+     * Add current group to set array
+     */
+    private function createSet()
+    {
+        $id = $this->generateVar('group');
+
+        // Add to javascript object as string
+        // This will assist in applying events to groups
+        $this->setArray[] = (string)$id;
+
+        $this->getCurrentElement()->addAttribute('name', $id);
+
+        $this->set[] = $this->getCurrentElement();
+
+        $this->generateParent($id);
+    }
+
+    /**
+     * Loops through the svg and set array and draws each element
+     */
+    private function draw()
+    {
+
+        // Draw all free standing elements not in a set
+        foreach ($this->svg as $element) {
+
+            // Update to element that is being parsed
+            $this->currentElement = $element;
+
+            if ($this->allowedElement()) {
+
+                // Don't draw groups
+                if (count($element->children()) == 0) {
+
+                    $this->drawElement();
+                }
+            }
+        }
+
+        // Loop through sets array and draw each set
+        foreach ($this->set as $set) {
+            $this->drawSet($set);
+        }
+    }
+
+    private function drawElement()
+    {
+        $method = 'draw' . ucfirst($this->getCurrentElement()->getName());
+
+        $this->$method();
+    }
+
+    private function drawSet($set)
+    {
+        $id = $this->getAttribute($set, 'name');
+
+        $this->addToJs('var ' . $id . ' = ' . $this->svgName . '.set();');
+
+        if ($this->setHasElements($set)) {
+
+            $this->addToJs(sprintf('%s.push(', $id), false, true);
+
+            foreach ($set as $element) {
+
+                // Update to element that is being parsed
+                $this->currentElement = $element;
+
+                if ($this->allowedElement()) {
+
+                    // Don't draw groups
+                    if (count($element->children()) == 0 ||
+                        $element->getName() == 'text'
+                    ) {
+
+                        // Start drawing!
+                        $this->inSet = true;
+                        $this->drawElement();
+                        $this->inSet = false;
+                    }
+                }
+            }
+
+            if (substr($this->setJs, -1) === ',') {
+                // Remove trailing ',' from $this->setJs
+                $this->setJs = substr($this->setJs, 0, -1);
+            }
+
+            $this->addToJs("\n);", true, true);
+        }
+
+        $attrs = $set->attributes();
+
+        $a = "";
+        $transform = false;
+        foreach ($attrs as $key => $value) {
+
+            if ($key != 'transform') {
+                $a .= "'$key': '$value',";
+            } else {
+
+                $transform = true;
+
+                preg_match('/^(.+)\((.+)\)/', $value, $m);
+
+                $type = $m[1];
+                $args = $m[2];
+
+                switch ($type) {
+
+                    case 'matrix':
+
+                        $t = 'transform("m' . $args . '")';
+
+                        break;
+
+                    case 'translate':
+
+                        $t = 'transform("t' . $args . '")';
+
+                        break;
+
+                    case 'scale':
+
+                        $t = 'transform("s' . $args . '")';
+
+                        break;
+                }
+            }
+        }
+
+        // HACK
+        $a = substr($a, 0, -1);
+
+        if ($transform) {
+            $this->addToJs($id . '.attr({' . $a . '});' . $id . '.' . $t . ';');
+        } else {
+            $this->addToJs($id . '.attr({' . $a . '});');
+        }
     }
 
     /**
      * Creates attribute string for current element
      *
-     * @param array  $ignored Array holding attributes to ignore
-     * @param string $var     Object getting attributes assigned to
+     * @param array $ignored Array holding attributes to ignore
+     * @param string $var Object getting attributes assigned to
+     *
      * @return string
      */
     private function generateAttributes($ignored = array(), $var = '')
@@ -606,7 +643,7 @@ class Parser implements ParserInterface
             if (($key != 'transform') && ($key != 'transformG')) {
 
                 // CHECK TO MAKE SURE WE CAN USE THIS ATTRIBUTE
-                if (! in_array($key, $ignored)) {
+                if (!in_array($key, $ignored)) {
 
                     $k = $key;
                     $v = $value;
@@ -620,7 +657,8 @@ class Parser implements ParserInterface
 
                         // Check if we have a fill attribute and needs gradient
                     } elseif (($k == 'fill') &&
-                        (preg_match('/^url\(#(.+)\)/', $v, $m) >= 1)) {
+                        (preg_match('/^url\(#(.+)\)/', $v, $m) >= 1)
+                    ) {
 
                         $gID = $m[1];
 
@@ -679,7 +717,8 @@ class Parser implements ParserInterface
                 }
 
                 if (strstr($this->getCurrentElement()->attributes()->transformG,
-                        $type) !== FALSE) {
+                        $type) !== FALSE
+                ) {
 
                     $t = $form . $t;
                 } else {
@@ -707,7 +746,7 @@ class Parser implements ParserInterface
             $a .= "'stroke-opacity': '1',";
         }
 
-        if (! isset($attrs['fill'])) {
+        if (!isset($attrs['fill'])) {
 
             $a .= "'fill': '#000000',";
         }
@@ -716,13 +755,13 @@ class Parser implements ParserInterface
 
         if ($this->inSet) {
 
-            if (! $transform) {
+            if (!$transform) {
                 return sprintf(".attr({%s})", $a);
             } else {
                 return sprintf(".attr({%s}).transform(\"%s\")", $a, $t);
             }
         } else {
-            if (! $transform) {
+            if (!$transform) {
                 return sprintf(";\n%s.attr({%s})", $var, $a);
             } else {
                 return sprintf(";\n%s.attr({%s});\n%s.transform(\"%s\")", $var,
@@ -732,27 +771,62 @@ class Parser implements ParserInterface
     }
 
     /**
-     * Generates unique id for elements
+     * Generates gradients array to extract gradient fills from
      */
-    private function generateVar($prefix = '')
+    private function generateGradients()
     {
+        foreach ($this->svg->defs->children() as $element) {
 
-        // Check if ID value was passed in for current element
-        $attrs = $this->getCurrentElement()->attributes();
+            $gradientID = (string)$element->attributes()->id;
 
-        $id = '';
+            $gradientTemp = array();
 
-        if (isset($attrs['id'])) {
+            // Create attribute key, value pairs
+            foreach ($element->attributes() as $key => $value) {
 
-            $id = $attrs['id'];
-            $id = str_replace('.', '', $id);
-            $id = str_replace('-', '', $id);
-        } else {
+                $key = (string)$key;
+                $value = (string)$value;
 
-            $id = $prefix . '_' . $this->currentVar ++;
+                $gradientTemp[$key] = (string)$value;
+            }
+
+            // Add gradient type
+            $gradientTemp['type'] = substr($element->getName(), 0, -8);
+
+            if (array_key_exists('gradientTransform', $gradientTemp)) {
+
+                if (strstr($gradientTemp['gradientTransform'], 'scale') !== FALSE) {
+                    $gradientTemp['scale'] = $gradientTemp['gradientTransform'];
+                }
+            }
+
+            $stops = array();
+            $stopInc = 0;
+
+            // Gradient element has stops
+            if (count($element->children()) > 0) {
+
+                // Loop through each stop
+                foreach ($element->children() as $key => $value) {
+
+                    foreach ($value->attributes() as $k => $v) {
+
+                        $stops[$stopInc][$k] = (string)$v;
+                    }
+
+                    $stopInc++;
+                }
+            }
+
+            $stopInc = 0;
+
+            $this->gradients[$gradientID] = $gradientTemp;
+            $this->gradients[$gradientID]['stops'] = $stops;
+
+            unset($gradientTemp);
+            unset($stops);
         }
 
-        return $id;
     }
 
     /**
@@ -775,7 +849,7 @@ class Parser implements ParserInterface
 
                 foreach ($this->getCurrentElement()->attributes() as $a => $b) {
 
-                    if (! in_array($a, $ignoredAttrs)) {
+                    if (!in_array($a, $ignoredAttrs)) {
 
                         if ($a == 'transform') {
                             $groupAttrs['transformG'] = $b;
@@ -801,62 +875,74 @@ class Parser implements ParserInterface
     }
 
     /**
-     * Generates gradients array to extract gradient fills from
+     * Generates unique id for elements
      */
-    private function generateGradients()
+    private function generateVar($prefix = '')
     {
-        foreach ($this->svg->defs->children() as $element) {
+        // Check if ID value was passed in for current element
+        $attrs = $this->getCurrentElement()->attributes();
 
-            $gradientID = (string) $element->attributes()->id;
+        $id = '';
 
-            $gradientTemp = array();
+        if (isset($attrs['id'])) {
 
-            // Create attribute key, value pairs
-            foreach ($element->attributes() as $key => $value) {
+            $id = $attrs['id'];
+            $id = str_replace('.', '', $id);
+            $id = str_replace('-', '', $id);
+        } else {
 
-                $key = (string) $key;
-                $value = (string) $value;
-
-                $gradientTemp[$key] = (string) $value;
-            }
-
-            // Add gradient type
-            $gradientTemp['type'] = substr($element->getName(), 0, -8);
-
-            if (array_key_exists('gradientTransform', $gradientTemp)) {
-
-                if (strstr($gradientTemp['gradientTransform'], 'scale') !== FALSE) {
-                    $gradientTemp['scale'] = $gradientTemp['gradientTransform'];
-                }
-            }
-
-            $stops = array();
-            $stopInc = 0;
-
-            // Gradient element has stops
-            if (count($element->children()) > 0) {
-
-                // Loop through each stop
-                foreach ($element->children() as $key => $value) {
-
-                    foreach ($value->attributes() as $k => $v) {
-
-                        $stops[$stopInc][$k] = (string) $v;
-                    }
-
-                    $stopInc ++;
-                }
-            }
-
-            $stopInc = 0;
-
-            $this->gradients[$gradientID] = $gradientTemp;
-            $this->gradients[$gradientID]['stops'] = $stops;
-
-            unset($gradientTemp);
-            unset($stops);
+            $id = $prefix . '_' . $this->currentVar++;
         }
 
+        return $id;
+    }
+
+    /**
+     * Returns attribute from current element
+     *
+     * @param  $attr Requested attribute
+     *
+     * @return string
+     */
+    private function getAttribute($obj, $attr)
+    {
+        $attrs = $obj->attributes();
+
+        return $attrs[$attr];
+    }
+
+    private function getCurrentElement()
+    {
+        return $this->currentElement;
+    }
+
+    /**
+     * Convert a hexadecimal color code to its RGB equivalent
+     *
+     * @param string $hexStr (hexadecimal color value)
+     * @param boolean $returnAsString (if set true, returns the value separated by the separator character. Otherwise returns associative array)
+     * @param string $separator (to separate RGB values. Applicable only if second parameter is true.)
+     *
+     * @return array or string (depending on second parameter. Returns False if invalid hex color value)
+     */
+    private function hexToRGB($hexStr, $returnAsString = false, $separator = ',')
+    {
+        $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
+        $rgbArray = array();
+        if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
+            $colorVal = hexdec($hexStr);
+            $rgbArray['r'] = 0xFF & ($colorVal >> 0x10);
+            $rgbArray['g'] = 0xFF & ($colorVal >> 0x8);
+            $rgbArray['b'] = 0xFF & $colorVal;
+        } elseif (strlen($hexStr) == 3) { //if shorthand notation, need some string manipulations
+            $rgbArray['r'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
+            $rgbArray['g'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
+            $rgbArray['b'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+        } else {
+            return false; //Invalid hex color code
+        }
+
+        return $returnAsString ? implode($separator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
 
     /**
@@ -980,55 +1066,6 @@ class Parser implements ParserInterface
     }
 
     /**
-     * Checks to see if set had children
-     */
-    private function setHasElements($set)
-    {
-        return count($set->children()) > 0;
-    }
-
-    /**
-     * Outputs the generated javascript for raphael and its groups
-     */
-    public function generateJs()
-    {
-        echo $this->js;
-        echo $this->setJs;
-    }
-
-    public function printSVG()
-    {
-        print_r($this->svg);
-    }
-
-    /**
-     * Returns the angle between 2 sets of x & y coordinates
-     * Useful for generating angle for fill gradients
-     */
-    private function angle($x1, $y1, $x2, $y2)
-    {
-        $y = $y2 - $y1;
-        $x = $x2 - $x1;
-
-        if ($x == 0)
-            $x = 1 / 10000;
-
-        $deg = rad2deg(atan(abs($y / $x)));
-
-        // Looks like RaphaelJS uses the reverse so lets flip it!
-        // Normally we would use ($y >= 0)
-        if ($y <= 0) {
-
-            $deg = $x < 0 ? 180 - $deg : $deg;
-        } else {
-
-            $deg = $x < 0 ? 180 + $deg : 360 - $deg;
-        }
-
-        return $deg;
-    }
-
-    /**
      * Converts RGB values into hexidecimal values
      */
     private function rgb2hex($r, $g = -1, $b = -1)
@@ -1051,40 +1088,12 @@ class Parser implements ParserInterface
         return '#' . $color;
     }
 
-    public function __call($method, $arguments)
-    {
-        if (strstr($method, 'draw') !== FALSE) {
-            // throw new Exception('Unsupported element:
-            // '.htmlentities('<'.strtolower(str_replace("draw", "", $method)).'
-            // />'));
-        }
-    }
-
     /**
-     * Convert a hexadecimal color code to its RGB equivalent
-     *
-     * @param string $hexStr (hexadecimal color value)
-     * @param boolean $returnAsString (if set true, returns the value separated by the separator character. Otherwise returns associative array)
-     * @param string $separator (to separate RGB values. Applicable only if second parameter is true.)
-     *
-     * @return array or string (depending on second parameter. Returns False if invalid hex color value)
+     * Checks to see if set had children
      */
-    private function hexToRGB($hexStr, $returnAsString = false, $separator = ',') {
-        $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
-        $rgbArray = array();
-        if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
-            $colorVal = hexdec($hexStr);
-            $rgbArray['r'] = 0xFF & ($colorVal >> 0x10);
-            $rgbArray['g'] = 0xFF & ($colorVal >> 0x8);
-            $rgbArray['b'] = 0xFF & $colorVal;
-        } elseif (strlen($hexStr) == 3) { //if shorthand notation, need some string manipulations
-            $rgbArray['r'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
-            $rgbArray['g'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
-            $rgbArray['b'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
-        } else {
-            return false; //Invalid hex color code
-        }
-        return $returnAsString ? implode($separator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
+    private function setHasElements($set)
+    {
+        return count($set->children()) > 0;
     }
 
 }
