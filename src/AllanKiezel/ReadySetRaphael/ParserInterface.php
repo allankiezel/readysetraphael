@@ -17,9 +17,7 @@ namespace AllanKiezel\ReadySetRaphael;
 interface ParserInterface
 {
     /**
-     * Setup the parsing process.
-     *
-     * @param \SimpleXMLElement $obj SVG to parse.
+     * Starts the parsing process.
      */
-    public function init($obj);
+    public function init();
 }

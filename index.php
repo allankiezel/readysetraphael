@@ -5,11 +5,13 @@
  * Date: 3/28/14
  * Time: 3:11 PM
  */
+ini_set('display_errors', 1);
+ini_set('error_reporting', E_ALL);
 
+use AllanKiezel\ReadySetRaphael\SVG;
 use AllanKiezel\ReadySetRaphael\Parser as Parser;
 
 require __DIR__.'/vendor/autoload.php';
-
 ?>
 
 <!DOCTYPE html>
@@ -25,16 +27,24 @@ require __DIR__.'/vendor/autoload.php';
     <script>
         <?php
 
-            try {
-                $xml =  file_get_contents(__DIR__ . '/svg/lion.svg');
-                $parser = new Parser($xml);
-            } catch (Exception $e) {
-                echo $e->getMessage() . '<br>';
-                echo $e->getTraceAsString();
-            }
+        try {
+
+            $xml =  file_get_contents(__DIR__ . '/svg/html5sticker.svg');
+
+            $svg = SVG::getInstance($xml, 'rsr');
+
+            $parser = new Parser($svg->getSVG());
+            $parser->init();
+
+        } catch (Exception $e) {
+            echo $e->getMessage() . '<br>';
+            echo $e->getTraceAsString();
+        }
 
         ?>
     </script>
 </div>
 <script><?php $parser->generateJs(); ?></script>
 </body>
+
+<?php //$parser->generateJs(); ?>

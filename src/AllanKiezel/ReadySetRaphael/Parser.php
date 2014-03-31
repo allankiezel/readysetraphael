@@ -8,6 +8,7 @@
 
 namespace AllanKiezel\ReadySetRaphael;
 
+use AllanKiezel\ReadySetRaphael\Element\ElementFactory;
 use AllanKiezel\ReadySetRaphael\ParserInterface;
 
 /**
@@ -30,7 +31,7 @@ class Parser implements ParserInterface
     public $currentSetName = '';
 
     /**
-     * @var array $gradients Gradients.
+     * @var array $gradients All gradients residing in SVG.
      */
     public $gradients = array();
 
@@ -107,32 +108,16 @@ class Parser implements ParserInterface
     /**
      * Constructor
      *
-     * @param string $svg SVG file contents.
+     * @param \SimpleXMLElement $svg SVG file contents.
      */
-    public function __construct($svg = '')
+    public function __construct(\SimpleXMLElement $svg = null)
     {
-        if (empty($svg)) {
+        if ($svg === null) {
             throw new \InvalidArgumentException('You must provide an SVG file string argument.');
         }
 
-        // Account for attributes with ':' in gradients
-        $svg = str_replace('xlink:', 'xlink-', $svg);
+        $this->svg = $svg;
 
-        $this->svg = simplexml_load_string($svg);
-
-        $this->initRaphael();
-
-        if (isset($this->svg->defs)) {
-            $this->generateGradients();
-        }
-
-        $this->init($this->svg);
-
-        $this->draw();
-
-        $this->setArray = str_replace('"', '', json_encode($this->setArray));
-
-        $this->addToJs(sprintf("\n\nvar rsrGroups = %s;", $this->setArray));
     }
 
     public function __call($method, $arguments)
@@ -298,7 +283,6 @@ class Parser implements ParserInterface
      */
     public function drawRect()
     {
-
         $attrs = $this->getCurrentElement()->attributes();
 
         $w = $attrs['width'];
@@ -322,7 +306,6 @@ class Parser implements ParserInterface
      */
     public function drawText()
     {
-
         $attrs = $this->getCurrentElement()->attributes();
 
         $x = $attrs['x'] != '' ? $attrs['x'] : 0;
@@ -373,11 +356,31 @@ class Parser implements ParserInterface
     }
 
     /**
-     * Iterates SVG and generates a multi-dimensional array of groups
+     * Starts the parsing process.
+     */
+    public function init()
+    {
+        $this->initRaphael();
+
+        if (isset($this->svg->defs)) {
+            $this->generateGradients();
+        }
+
+        $this->parse($this->svg);
+
+        $this->draw();
+
+        $this->setArray = str_replace('"', '', json_encode($this->setArray));
+
+        $this->addToJs(sprintf("\n\nvar rsrGroups = %s;", $this->setArray));
+    }
+
+    /**
+     * Iterates through SVG and generates a multi-dimensional array of groups
      *
      * @param \SimpleXMLElement $obj SVG to parse.
      */
-    public function init($obj)
+    private function parse($obj)
     {
         // Loop through svg and create set array
         foreach ($obj->children() as $element) {
@@ -392,14 +395,14 @@ class Parser implements ParserInterface
 
                     $this->createSet();
 
-                    $this->init($element);
+                    $this->parse($element);
                 }
             }
         }
     }
 
     /**
-     * Creates the intial Raphael object
+     * Creates the initial Raphael object
      */
     public function initRaphael()
     {
@@ -502,6 +505,7 @@ class Parser implements ParserInterface
                 if (count($element->children()) == 0) {
 
                     $this->drawElement();
+
                 }
             }
         }
@@ -512,11 +516,31 @@ class Parser implements ParserInterface
         }
     }
 
+    /**
+     * Responsible for loading element class and calling draw() method
+     */
     private function drawElement()
     {
-        $method = 'draw' . ucfirst($this->getCurrentElement()->getName());
 
-        $this->$method();
+        $type = ucfirst($this->getCurrentElement()->getName());
+
+        if ($type === 'Polygon' || $type === 'Path') {
+            try {
+                $element = ElementFactory::create($type, $this->inSet);
+                $element->init($this->getCurrentElement());
+
+                $output = $element->draw();
+
+                $this->addToJs($output);
+                //echo $output . '<br><br>';
+            } catch(\InvalidArgumentException $e) {
+                echo $e->getMessage();
+            }
+        } else {
+            $method = 'draw' . $type;
+            $this->$method();
+        }
+
     }
 
     private function drawSet($set)

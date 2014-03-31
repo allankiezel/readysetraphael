@@ -15,7 +15,7 @@ use AllanKiezel\ReadySetRaphael\Parser;
  * Class PolygonElement
  * @Inject parser
  */
-class PolygonElement extends AbstractElement
+class PathElement extends AbstractElement
 {
     /**
      * Generates the output string of current element.
@@ -24,19 +24,12 @@ class PolygonElement extends AbstractElement
      */
     public function draw()
     {
-        //echo $this->getElement()->attributes()['points'];
         $varName = $this->generateVar('path');
 
-        $d = sprintf("M %s %s", $this->getAttribute('points'), 'z');
+        $d = $this->getAttribute('d');
 
-        $js = 'var ' . $varName . ' = ' . $this->svgName . '.path("' . $d .
-            '")' .
-            $this->generateAttributes(
-                array(
-                    'points'
-                ), $varName) . ".data('id', '$varName')" . ';';
+        $js = 'var ' . $varName . ' = ' . $this->svgName . '.path("' . $d . '")' . $this->generateAttributes(array('d'), $varName) . ".data('id', '$varName')" . ';';
 
         return $js;
-
     }
 }

@@ -8,6 +8,8 @@
 
 namespace AllanKiezel\ReadySetRaphael\Element;
 
+use AllanKiezel\ReadySetRaphael\Parser;
+
 /**
  * Interface for elements.
  *
@@ -17,8 +19,16 @@ namespace AllanKiezel\ReadySetRaphael\Element;
 interface ElementInterface
 {
     /**
-     * Should generate and return the output string of the element
+     * Initiate element
+     *
+     * @param \SimpleXMLElement $element Element to draw.
+     */
+    public function init(\SimpleXMLElement $element);
+
+    /**
+     * Generate and return the output string of the element.
+     *
+     * @return string Generated element JS string.
      */
     public function draw();
-
 }
