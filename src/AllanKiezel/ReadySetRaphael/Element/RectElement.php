@@ -12,7 +12,7 @@ use AllanKiezel\ReadySetRaphael\Element\AbstractElement;
 use AllanKiezel\ReadySetRaphael\Parser;
 
 /**
- * Class PathElement
+ * SVG Rect Element Output
  *
  * @package AllanKiezel\ReadySetRaphael\Element
  * @author Allan Kiezel <allan.kiezel@gmail.com>
@@ -28,10 +28,14 @@ class RectElement extends AbstractElement
     {
         $varName = $this->generateVar('rect');
 
+        $x = $this->getAttribute('x');
+        $x = $x ? $x : 0;
+
+        $y = $this->getAttribute('y');
+        $y = $y ? $y : 0;
+
         $w = $this->getAttribute('width');
         $h = $this->getAttribute('height');
-        $x = $this->getAttribute('x') ? $this->getAttribute('x') : 0;
-        $y = $this->getAttribute('y') ? $this->getAttribute('y') : 0;
 
         $format = 'var %s = %s.rect(%s, %s, %s, %s)%s.data("id", "%1$s");';
 

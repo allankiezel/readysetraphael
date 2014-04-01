@@ -12,7 +12,7 @@ use AllanKiezel\ReadySetRaphael\Element\AbstractElement;
 use AllanKiezel\ReadySetRaphael\Parser;
 
 /**
- * Class PolygonElement
+ * SVG Polygon Element Output
  *
  * @package AllanKiezel\ReadySetRaphael\Element
  * @author Allan Kiezel <allan.kiezel@gmail.com>

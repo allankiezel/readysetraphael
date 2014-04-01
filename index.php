@@ -29,7 +29,7 @@ require __DIR__.'/vendor/autoload.php';
 
         try {
 
-            $xml =  file_get_contents(__DIR__ . '/svg/html5sticker.svg');
+            $xml =  file_get_contents(__DIR__ . '/svg/map.svg');
 
             $svg = SVG::getInstance($xml, 'rsr');
 

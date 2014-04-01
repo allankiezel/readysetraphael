@@ -12,12 +12,12 @@ use AllanKiezel\ReadySetRaphael\Element\AbstractElement;
 use AllanKiezel\ReadySetRaphael\Parser;
 
 /**
- * SVG Path Element Output
+ * SVG Ellipse Element Output
  *
  * @package AllanKiezel\ReadySetRaphael\Element
  * @author Allan Kiezel <allan.kiezel@gmail.com>
  */
-class PathElement extends AbstractElement
+class EllipseElement extends AbstractElement
 {
     /**
      * Generates the output string of current element.
@@ -26,13 +26,16 @@ class PathElement extends AbstractElement
      */
     public function draw()
     {
-        $varName = $this->generateVar('path');
+        $varName = $this->generateVar('ellipse');
 
-        $d = $this->getAttribute('d');
+        $cx = $this->getAttribute('cx');
+        $cy = $this->getAttribute('cy');
+        $rx = $this->getAttribute('rx');
+        $ry = $this->getAttribute('ry');
 
-        $format = 'var %s = %s.path("%s")%s.data("id", "%1$s");';
+        $format = 'var %s = %s.ellipse(%s, %s, %s, %s)%s.data("id", "%1$s");';
 
-        $js = sprintf($format, $varName, $this->svgName, $d, $this->generateAttributes(array('d'), $varName));
+        $js = sprintf($format, $varName, $this->svgName, $cx, $cy, $rx, $ry, $this->generateAttributes(array('cx', 'cy', 'rx', 'ry'), $varName));
 
         return $js;
     }

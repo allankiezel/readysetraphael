@@ -143,10 +143,9 @@ class Parser implements ParserInterface
 
         /*
          * If adding to a "set" add the var name to the set and
-         * add the element to the js ouput
+         * add the element to the js output
         */
         if ($this->inSet) {
-
             $pattern = '/var\s+(.+)\s*=/';
 
             preg_match_all($pattern, $string, $parts, PREG_SET_ORDER);
@@ -154,7 +153,6 @@ class Parser implements ParserInterface
             $varName = $parts[0][1];
 
             $setJs .= "\n\t" . $varName . ",";
-
         }
 
         $js .= $string;
@@ -529,15 +527,16 @@ class Parser implements ParserInterface
 
         $type = ucfirst($this->getCurrentElement()->getName());
 
-        if ($type === 'Polygon' || $type === 'Path' || $type === 'Rect') {
+        if ($type === 'Polygon' || $type === 'Path' || $type === 'Rect' || $type === 'Circle' || $type === 'Ellipse' || $type === 'Text') {
             try {
                 $element = ElementFactory::create($type, $this->inSet);
                 $element->init($this->getCurrentElement());
 
                 $output = $element->draw();
 
-                $this->addToJs($output);
-                //echo $output . '<br><br>';
+                if ($output) {
+                    $this->addToJs($output);
+                }
             } catch(\InvalidArgumentException $e) {
                 echo $e->getMessage();
             }
@@ -890,13 +889,19 @@ class Parser implements ParserInterface
 
                 foreach ($groupAttrs as $a => $b) {
 
-                    $element->addAttribute($a, $b);
+                    /** @var \SimpleXMLObject $currentAttr Element's current attr name for key. */
+                    $currentAttr = $element->attributes()[$a];
+
+                    if (empty($currentAttr)) {
+                        $element->addAttribute($a, $b);
+                    }
+
                 }
 
                 /** @var \SimpleXMLObject $parentName Element's current parent name. */
                 $currentParentName = $element->attributes()['parent'];
 
-                if (!empty($currentParentName)) {
+                if (empty($currentParentName)) {
                     $element->addAttribute('parent', $this->parentSetName);
                 }
             }
