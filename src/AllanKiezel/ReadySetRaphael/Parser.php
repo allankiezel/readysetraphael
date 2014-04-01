@@ -196,10 +196,6 @@ class Parser implements ParserInterface
     {
         $this->initRaphael();
 
-        if (isset($this->svg->defs)) {
-            $this->generateGradients();
-        }
-
         $this->parse($this->svg);
 
         $this->draw();
