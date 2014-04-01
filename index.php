@@ -12,6 +12,20 @@ use AllanKiezel\ReadySetRaphael\SVG;
 use AllanKiezel\ReadySetRaphael\Parser as Parser;
 
 require __DIR__.'/vendor/autoload.php';
+
+try {
+
+    $xml =  file_get_contents(__DIR__ . '/svg/map.svg');
+
+    SVG::init($xml, 'rsr');
+
+    $parser = new Parser(SVG::getSVG());
+    $parser->init();
+
+} catch (Exception $e) {
+    echo $e->getMessage() . '<br>';
+    echo $e->getTraceAsString();
+}
 ?>
 
 <!DOCTYPE html>
@@ -23,26 +37,6 @@ require __DIR__.'/vendor/autoload.php';
 
 <body>
 <div id="rsr"></div>
-<div id="output">
-    <script>
-        <?php
-
-        try {
-
-            $xml =  file_get_contents(__DIR__ . '/svg/map.svg');
-
-            SVG::init($xml, 'rsr');
-
-            $parser = new Parser(SVG::getSVG());
-            $parser->init();
-
-        } catch (Exception $e) {
-            echo $e->getMessage() . '<br>';
-            echo $e->getTraceAsString();
-        }
-
-        ?>
-    </script>
-</div>
+<div id="output"></div>
 <script><?php $parser->generateJs(); ?></script>
 </body>
