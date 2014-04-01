@@ -21,9 +21,12 @@ $xml =  file_get_contents('sample.svg');
 
 try {
 
-    $svg = new SVGToRaphael( $xml );
-    sleep(2);
-    $svg->generateJs();
+    $xml =  file_get_contents([path_to_svg]);
+
+    $svg = SVG::getInstance($xml, 'rsr');
+
+    $parser = new Parser(SVG::getSVG());
+    $parser->init();
 
 } catch (Exception $e) {
 
