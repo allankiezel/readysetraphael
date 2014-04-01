@@ -29,14 +29,14 @@ class TextElement extends AbstractElement
         $varName = $this->generateVar('text');
 
         $x = $this->getAttribute('x');
-        $x = $x != '' ? $x : 0;
+        $x = !empty($x) ? $x : 0;
 
         $y = $this->getAttribute('y');
-        $y = $y != '' ? $y : 0;
+        $y = !empty($y) ? $y : 0;
 
         $text = (string)$this->getElement();
 
-        if (isset($this->getElement()->tspan) && $text == '') {
+        if (isset($this->getElement()->tspan) && $text === '') {
 
             for ($i = 0, $len = count($this->getElement()->tspan) - 1; $i <= $len; $i++) {
                 $text .= $this->getElement()->tspan[$i] . '\n';
@@ -45,7 +45,7 @@ class TextElement extends AbstractElement
             $text = substr($text, 0, -2);
         }
 
-        if ($text == '') {
+        if ($text === '') {
 
             return false;
         }

@@ -46,5 +46,3 @@ require __DIR__.'/vendor/autoload.php';
 </div>
 <script><?php $parser->generateJs(); ?></script>
 </body>
-
-<?php //$parser->generateJs(); ?>
