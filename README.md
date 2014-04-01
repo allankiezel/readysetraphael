@@ -16,9 +16,6 @@ Usage
 ```
 <?php
 
-$xml =  file_get_contents('sample.svg');
-
-
 try {
 
     $xml =  file_get_contents([path_to_svg]);
