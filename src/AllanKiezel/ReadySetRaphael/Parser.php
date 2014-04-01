@@ -529,7 +529,7 @@ class Parser implements ParserInterface
 
         $type = ucfirst($this->getCurrentElement()->getName());
 
-        if ($type === 'Polygon' || $type === 'Path') {
+        if ($type === 'Polygon' || $type === 'Path' || $type === 'Rect') {
             try {
                 $element = ElementFactory::create($type, $this->inSet);
                 $element->init($this->getCurrentElement());

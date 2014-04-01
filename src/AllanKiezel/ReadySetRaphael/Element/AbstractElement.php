@@ -32,10 +32,15 @@ abstract class AbstractElement implements ElementInterface
     protected $svg;
 
     /**
-     * @var boolean $inSet Defines whether draw() adds to a "set" (group).
+     * @var bool $inSet Defines whether draw() adds to a "set" (group).
      */
     private $inSet = false;
 
+    /**
+     * Constructs.
+     *
+     * @param bool $inSet Is element a part of a set?
+     */
     public function __construct($inSet = false)
     {
         $this->svg = SVG::getSVG();
@@ -45,15 +50,6 @@ abstract class AbstractElement implements ElementInterface
         if ($inSet) {
             $this->inSet = true;
         }
-    }
-
-    /**
-     * Generates the output string of current element.
-     *
-     * @return string Generated element JS string.
-     */
-    public function draw()
-    {
     }
 
     /**
@@ -440,6 +436,20 @@ abstract class AbstractElement implements ElementInterface
         return $deg;
     }
 
+    private function generateRandomString($length)
+    {
+        $str = '';
+
+        $chars = "abcdefghijklmnopqrstuvwxyz";
+
+        $size = strlen($chars);
+        for ($i = 0; $i < $length; $i++) {
+            $str .= $chars[rand(0, $size - 1)];
+        }
+
+        return $str;
+    }
+
     /**
      * Convert a hexadecimal color code to its RGB equivalent
      *
@@ -490,20 +500,6 @@ abstract class AbstractElement implements ElementInterface
         $color .= (strlen($b) < 2 ? '0' : '') . $b;
 
         return '#' . $color;
-    }
-
-    private function generateRandomString($length)
-    {
-        $str = '';
-
-        $chars = "abcdefghijklmnopqrstuvwxyz";
-
-        $size = strlen($chars);
-        for ($i = 0; $i < $length; $i++) {
-            $str .= $chars[rand(0, $size-1)];
-        }
-
-        return $str;
     }
 
 }

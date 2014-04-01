@@ -17,7 +17,7 @@ use AllanKiezel\ReadySetRaphael\Parser;
  * @package AllanKiezel\ReadySetRaphael\Element
  * @author Allan Kiezel <allan.kiezel@gmail.com>
  */
-class PathElement extends AbstractElement
+class RectElement extends AbstractElement
 {
     /**
      * Generates the output string of current element.
@@ -26,13 +26,16 @@ class PathElement extends AbstractElement
      */
     public function draw()
     {
-        $varName = $this->generateVar('path');
+        $varName = $this->generateVar('rect');
 
-        $d = $this->getAttribute('d');
+        $w = $this->getAttribute('width');
+        $h = $this->getAttribute('height');
+        $x = $this->getAttribute('x') ? $this->getAttribute('x') : 0;
+        $y = $this->getAttribute('y') ? $this->getAttribute('y') : 0;
 
-        $format = 'var %s = %s.path("%s")%s.data("id", "%1$s");';
+        $format = 'var %s = %s.rect(%s, %s, %s, %s)%s.data("id", "%1$s");';
 
-        $js = sprintf($format, $varName, $this->svgName, $d, $this->generateAttributes(array('d'), $varName));
+        $js = sprintf($format, $varName, $this->svgName, $x, $y, $w, $h, $this->generateAttributes(array('width', 'height'), $varName));
 
         return $js;
     }

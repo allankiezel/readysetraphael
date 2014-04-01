@@ -7,6 +7,14 @@
  */
 namespace AllanKiezel\ReadySetRaphael;
 
+/**
+ * Base SVG class acting as global SVG object
+ *
+ * @todo Use dependency inject instead!
+ *
+ * @package AllanKiezel\ReadySetRaphael
+ * @author Allan Kiezel <allan.kiezel@gmail.com>
+ */
 class SVG
 {
     /** @var array $gradients All gradients residing in SVG. */

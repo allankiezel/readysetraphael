@@ -26,16 +26,14 @@ class PolygonElement extends AbstractElement
      */
     public function draw()
     {
-        //echo $this->getElement()->attributes()['points'];
         $varName = $this->generateVar('path');
 
         $d = sprintf("M %s %s", $this->getAttribute('points'), 'z');
 
-        $format  = 'var %s = %s.path("%s")%s.data("id", "%1$s");';
+        $format = 'var %s = %s.path("%s")%s.data("id", "%1$s");';
 
         $js = sprintf($format, $varName, $this->svgName, $d, $this->generateAttributes(array('points'), $varName));
 
         return $js;
-
     }
 }
