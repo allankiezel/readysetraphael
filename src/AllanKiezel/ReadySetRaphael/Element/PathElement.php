@@ -12,8 +12,10 @@ use AllanKiezel\ReadySetRaphael\Element\AbstractElement;
 use AllanKiezel\ReadySetRaphael\Parser;
 
 /**
- * Class PolygonElement
- * @Inject parser
+ * Class PathElement
+ *
+ * @package AllanKiezel\ReadySetRaphael\Element
+ * @author Allan Kiezel <allan.kiezel@gmail.com>
  */
 class PathElement extends AbstractElement
 {
@@ -28,7 +30,9 @@ class PathElement extends AbstractElement
 
         $d = $this->getAttribute('d');
 
-        $js = 'var ' . $varName . ' = ' . $this->svgName . '.path("' . $d . '")' . $this->generateAttributes(array('d'), $varName) . ".data('id', '$varName')" . ';';
+        $format  = 'var %s = %s.path("%s")%s.data("id", "%1$s");';
+
+        $js = sprintf($format, $varName, $this->svgName, $d, $this->generateAttributes(array('d'), $varName));
 
         return $js;
     }

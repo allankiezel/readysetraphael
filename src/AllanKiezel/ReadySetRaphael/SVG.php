@@ -82,7 +82,7 @@ class SVG
     /**
      * @return \SimpleXMLElement
      */
-    public function getSVG()
+    public static function getSVG()
     {
         return static::$svg;
     }
@@ -112,7 +112,7 @@ class SVG
      */
     private function generateGradients()
     {
-        $svg = $this->getSVG();
+        $svg = self::getSVG();
 
         foreach ($svg->defs->children() as $element) {
 

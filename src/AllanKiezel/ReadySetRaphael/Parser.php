@@ -480,7 +480,12 @@ class Parser implements ParserInterface
         // This will assist in applying events to groups
         $this->setArray[] = (string)$id;
 
-        $this->getCurrentElement()->addAttribute('name', $id);
+        /** @var \SimpleXMLObject $currentName Element's current name. */
+        $currentName = $this->getCurrentElement()->attributes()['name'];
+
+        if (empty($currentName)) {
+            $this->getCurrentElement()->addAttribute('name', $id);
+        }
 
         $this->set[] = $this->getCurrentElement();
 

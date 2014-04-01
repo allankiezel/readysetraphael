@@ -8,8 +8,10 @@
 
 namespace tests;
 
+use AllanKiezel\ReadySetRaphael\SVG;
+
 /**
- * Base testcase class for all Doctrine testcases.
+ * Base test case class for all RSR test cases.
  */
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
@@ -20,6 +22,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->sampleSVGContents = file_get_contents(__DIR__  . '/_data/sample.svg');
+
+        $svg = SVG::getInstance($this->sampleSVGContents, 'rsr');
+
     }
 
     protected function tearDown()

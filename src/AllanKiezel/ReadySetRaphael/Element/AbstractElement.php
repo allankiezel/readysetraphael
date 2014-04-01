@@ -14,9 +14,6 @@ use AllanKiezel\ReadySetRaphael\SVG;
 /**
  * Abstract base element class.
  *
- *
- * @Inject parser
- *
  * @package AllanKiezel\ReadySetRaphael\Element
  */
 abstract class AbstractElement implements ElementInterface
@@ -41,7 +38,7 @@ abstract class AbstractElement implements ElementInterface
 
     public function __construct($inSet = false)
     {
-        $this->svg = SVG::getInstance()->getSVG();
+        $this->svg = SVG::getSVG();
         $this->gradients = SVG::getGradients();
         $this->svgName = SVG::getName();
 

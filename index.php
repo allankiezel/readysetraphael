@@ -33,7 +33,7 @@ require __DIR__.'/vendor/autoload.php';
 
             $svg = SVG::getInstance($xml, 'rsr');
 
-            $parser = new Parser($svg->getSVG());
+            $parser = new Parser(SVG::getSVG());
             $parser->init();
 
         } catch (Exception $e) {
