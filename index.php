@@ -31,7 +31,7 @@ require __DIR__.'/vendor/autoload.php';
 
             $xml =  file_get_contents(__DIR__ . '/svg/map.svg');
 
-            $svg = SVG::getInstance($xml, 'rsr');
+            SVG::init($xml, 'rsr');
 
             $parser = new Parser(SVG::getSVG());
             $parser->init();

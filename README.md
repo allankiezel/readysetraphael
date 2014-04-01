@@ -23,7 +23,7 @@ try {
 
     $xml =  file_get_contents([path_to_svg]);
 
-    $svg = SVG::getInstance($xml, 'rsr');
+    SVG::init($xml, 'rsr');
 
     $parser = new Parser(SVG::getSVG());
     $parser->init();

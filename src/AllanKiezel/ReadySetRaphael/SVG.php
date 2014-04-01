@@ -68,23 +68,19 @@ class SVG
     }
 
     /**
-     * Returns the *SVG* instance of this class.
+     * Initializes the *SVG* instance of this class.
      *
-     * @var SVG $instance The *SVG* instances of this class.
+     * @var string $svg SVG file contents.
      * @var string $name JavaScript variable name to use in output.
      *
      * @static
-     *
-     * @return SVG The *SVG* instance.
      */
-    public static function getInstance($svg = '', $name = '')
+    public static function init($svg = '', $name = '')
     {
         static $instance = null;
         if (null === $instance) {
             $instance = new static($svg, $name);
         }
-
-        return $instance;
     }
 
     /**
