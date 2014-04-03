@@ -43,9 +43,9 @@ abstract class AbstractElement implements ElementInterface
      */
     public function __construct($inSet = false)
     {
-        $this->svg = SVG::getSVG();
-        $this->gradients = SVG::getGradients();
-        $this->svgName = SVG::getName();
+        $this->svg = SVG::getInstance();
+        $this->gradients = $this->svg->getGradients();
+        $this->svgName = $this->svg->getName();
 
         if ($inSet) {
             $this->inSet = true;
@@ -118,13 +118,15 @@ abstract class AbstractElement implements ElementInterface
     {
         if (isset($this->getAttributes()->style)) {
 
-            $vals = explode(';',
-                $this->getAttributes()->style);
+            $vals = explode(';', $this->getAttributes()->style);
 
             foreach ($vals as $sep) {
 
-                list ($k, $v) = explode(":", $sep);
-                $this->getElement()->addAttribute($k, $v);
+                if (!empty($sep)) {
+                    list ($k, $v) = explode(":", $sep);
+                    $this->getElement()->addAttribute($k, $v);
+                }
+
             }
 
         }
@@ -316,11 +318,11 @@ abstract class AbstractElement implements ElementInterface
 
             $gradient = $this->gradients[$id];
         }
-
         switch ($gradient['type']) {
 
             case 'linear':
 
+                //if (!isset($gradient['x1'])) { $g = false; break; }
                 $angle = $this->angle($gradient['x1'], $gradient['y1'],
                     $gradient['x2'], $gradient['y2']);
 

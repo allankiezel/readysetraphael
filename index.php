@@ -1,12 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: allankiezel
- * Date: 3/28/14
- * Time: 3:11 PM
- */
-ini_set('display_errors', 1);
-ini_set('error_reporting', E_ALL);
 
 use AllanKiezel\ReadySetRaphael\SVG;
 use AllanKiezel\ReadySetRaphael\Parser as Parser;
@@ -15,11 +7,12 @@ require __DIR__.'/vendor/autoload.php';
 
 try {
 
-    $xml =  file_get_contents(__DIR__ . '/svg/map.svg');
+    $xml =  file_get_contents(__DIR__ . '/svg/test.svg');
 
-    SVG::init($xml, 'rsr');
+    $svg = SVG::getInstance('rsr');
+    $svg->setSVG($xml);
 
-    $parser = new Parser(SVG::getSVG());
+    $parser = new Parser($svg->getSVG());
     $parser->init();
 
 } catch (Exception $e) {

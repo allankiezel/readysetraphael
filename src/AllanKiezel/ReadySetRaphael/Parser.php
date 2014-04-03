@@ -112,7 +112,9 @@ class Parser implements ParserInterface
         }
 
         $this->svg = $svg;
-        $this->svgName = SVG::getName();
+
+        $svgInstance = SVG::getInstance();
+        $this->svgName = $svgInstance->getName();
 
     }
 
@@ -257,7 +259,7 @@ class Parser implements ParserInterface
         // This will assist in applying events to groups
         $this->setArray[] = (string)$id;
 
-        /** @var \SimpleXMLObject $currentName Element's current name. */
+        /** @var \SimpleXMLElement $currentName Element's current name. */
         $currentName = $this->getCurrentElement()->attributes()['name'];
 
         if (empty($currentName)) {

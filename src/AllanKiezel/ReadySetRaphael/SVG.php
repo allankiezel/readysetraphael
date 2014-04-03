@@ -18,51 +18,44 @@ namespace AllanKiezel\ReadySetRaphael;
 class SVG
 {
     /** @var array $gradients All gradients residing in SVG. */
-    protected static $gradients = array();
+    protected $gradients = array();
 
     /** @var string $name JavaScript RaphaelJS variable. */
-    protected static $name = 'raphael';
-
-    /**
-     * @return string
-     */
-    public static function getName()
-    {
-        return self::$name;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getGradients()
-    {
-        return self::$gradients;
-    }
+    protected $name = 'raphael';
 
     /** @var \SimpleXMLElement */
-    private static $svg;
+    private $svg;
+
+    protected static $instance = null;
 
     /**
-     * Protected constructor to prevent creating a new instance of the
-     * *SVG* via the `new` operator from outside of this class.
+     * @param string $svg
      */
-    private function __construct($svg, $name)
+    public function setSVG($svg)
     {
         if (empty($svg)) {
             throw new \InvalidArgumentException('You must provide an SVG file string argument.');
         }
 
-        if (!empty($name)) {
-            self::$name = $name;
-        }
-
         // Account for attributes with ':' in gradients
         $svg = str_replace('xlink:', 'xlink-', $svg);
 
-        self::$svg = simplexml_load_string($svg);
+        $this->svg = simplexml_load_string($svg);
 
-        if (isset(static::$svg->defs)) {
+        if (isset($this->svg->defs)) {
             $this->generateGradients();
+        }
+
+    }
+
+    /**
+     * Protected constructor to prevent creating a new instance of the
+     * *SVG* via the `new` operator from outside of this class.
+     */
+    private function __construct($name)
+    {
+        if (!empty($name)) {
+            $this->name = $name;
         }
 
     }
@@ -70,25 +63,41 @@ class SVG
     /**
      * Initializes the *SVG* instance of this class.
      *
-     * @var string $svg SVG file contents.
      * @var string $name JavaScript variable name to use in output.
      *
      * @static
      */
-    public static function init($svg = '', $name = '')
+    public static function getInstance($name = '')
     {
-        static $instance = null;
-        if (null === $instance) {
-            $instance = new static($svg, $name);
+        if (null === self::$instance) {
+            self::$instance = new self($name);
         }
+
+        return self::$instance;
     }
 
     /**
      * @return \SimpleXMLElement
      */
-    public static function getSVG()
+    public function getSVG()
     {
-        return static::$svg;
+        return $this->svg;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGradients()
+    {
+        return $this->gradients;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -116,7 +125,7 @@ class SVG
      */
     private function generateGradients()
     {
-        $svg = self::getSVG();
+        $svg = $this->getSVG();
 
         foreach ($svg->defs->children() as $element) {
 
@@ -163,8 +172,8 @@ class SVG
 
             $stopInc = 0;
 
-            self::$gradients[$gradientID] = $gradientTemp;
-            self::$gradients[$gradientID]['stops'] = $stops;
+            $this->gradients[$gradientID] = $gradientTemp;
+            $this->gradients[$gradientID]['stops'] = $stops;
 
             unset($gradientTemp);
             unset($stops);
