@@ -17,13 +17,16 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
     protected $sampleSVGContents;
 
+    protected $svg;
+
     protected function setUp()
     {
         parent::setUp();
 
         $this->sampleSVGContents = file_get_contents(__DIR__  . '/_data/sample.svg');
 
-        $svg = SVG::getInstance($this->sampleSVGContents, 'rsr');
+        $this->svg = SVG::getInstance('rsr');
+        $this->svg->setSVG($this->sampleSVGContents);
 
     }
 

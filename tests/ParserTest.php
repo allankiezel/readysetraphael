@@ -21,7 +21,7 @@ class ParserTest extends TestCase {
     {
         parent::setUp();
 
-        $this->parser = new Parser(SVG::getSVG());
+        $this->parser = new Parser($this->svg->getSVG());
         $this->parser->init();
     }
 
