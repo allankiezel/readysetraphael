@@ -46,6 +46,15 @@ class Parser implements ParserInterface
     public $set = array();
 
     /**
+     * @var array $removableVarNameChars Characters to remove from variable names.
+     */
+    public $removableVarNameChars = array(
+        '.',
+        '-',
+        '+'
+    );
+
+    /**
      * @var \SimpleXMLElement $currentElement Current pointer position element during iteration.
      */
     private $currentElement = null;
@@ -474,9 +483,11 @@ class Parser implements ParserInterface
 
         if (isset($attrs['id'])) {
 
+            $removable = $this->removableVarNameChars;
+
             $id = $attrs['id'];
-            $id = str_replace('.', '', $id);
-            $id = str_replace('-', '', $id);
+            $id = str_replace($removable, '', $id);
+
         } else {
 
             $id = $prefix . '_' . $this->currentVar++;
