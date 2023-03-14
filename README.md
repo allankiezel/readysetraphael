@@ -5,11 +5,6 @@ Raphaël JavaScript Library Converter
 
 Ready. Set. Raphael. will convert contents from an SVG file to Raphaël JavaScript code.
 
-Online Conversion Tool
-----
-
-Please visit [www.readysetraphael.com](http://www.readysetraphael.com/ "Ready Set Raphael") to use our automatic converter for your projects.
-
 Usage
 --------------
 
